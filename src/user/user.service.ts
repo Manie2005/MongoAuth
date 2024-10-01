@@ -59,7 +59,7 @@ export class UserService {
 
     // Generate OTP and expiration time (10 minutes)
     const otpCode = this.generateOtp();
-    const otpexpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiration
+    const otpexpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiration
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
