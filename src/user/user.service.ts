@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { LoginDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UserService {
@@ -100,10 +101,7 @@ export class UserService {
     const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new BadRequestException('Invalid email');
-    }
-
-    // Check if OTP is valid and not expired
-   
+    } 
 
     // Clear OTP fields after successful verification
     user.otpCode = undefined;
@@ -116,5 +114,26 @@ export class UserService {
       console.error(`Error verifying user: ${error.message}`);
       throw new InternalServerErrorException('Error verifying account. Please try again later.');
     }
+
+    
   }
+  //User login Method
+  async login(loginDto: LoginDto): Promise<any> { //the toke here allows JWT to be returned 
+    const { email, password } = loginDto;
+
+    // Find user by  their email
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Compare passwords
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+   
+  }
+
 }
