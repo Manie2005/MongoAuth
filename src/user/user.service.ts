@@ -26,26 +26,26 @@ export class UserService {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'immanueliniobong@gmail.com',  // Correct field name
-        pass: 'jicvrgsgyoyutrna',            // Your generated app password
+        user: 'immanueliniobong@gmail.com',  
+        pass: 'jicvrgsgyoyutrna',            
       },
-      secure: true,                    // Use TLS
-      host: 'smtp.gmail.com',           // Correct Gmail SMTP server address
-      port: 465,                        // Port for secure SMTP
+      secure: true,                   
+            host: 'smtp.gmail.com',         
+      port: 465,                      
     }); 
       
-    try {
-      await transporter.sendMail({
-        from: 'immanueliniobong@gmail.com',  // Sender's email
-        to: email,                           // Recipient's email
-        subject: subject,
-        text: text,
-      });
-      console.log('Email sent successfully');
-    } catch (error) {
-      console.error(`Failed to send email: ${error.message}`);
-      throw new Error('Failed to send email. Please try again later.');
-    }
+    // try {
+    //   await transporter.sendMail({
+    //     from: 'immanueliniobong@gmail.com',  // Sender's email
+    //     to: email,                           // Recipient's email
+    //     subject: subject,
+    //     text: text,
+    //   });
+    //   console.log('Email sent successfully');
+    // } catch (error) {
+    //   console.error(`Failed to send email: ${error.message}`);
+    //   throw new Error('Failed to send email. Please try again later.');
+    // }
   }
 
   // Signup method
@@ -58,7 +58,7 @@ export class UserService {
       throw new BadRequestException('User already exists');
     }
 
-    // Generate OTP and expiration time (10 minutes)
+    // Generate OTP and expiration time
     const otpCode = this.generateOtp();
     const otpexpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiration
 
