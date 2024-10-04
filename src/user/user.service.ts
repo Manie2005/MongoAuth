@@ -5,48 +5,59 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { LoginDto } from './dto/login-user.dto';
-
+import * as nodemailer from 'nodemailer';
+import { MailerService } from '@nestjs-modules/mailer';
+require ('dotenv').config();
 @Injectable()
 export class UserService {
+  validateUser(email: string, password: string) {
+     throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService, // Inject MailerService
   ) {}
 
-  // Generate a random OTP upon signup
+  // Generate a random OTP
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  // Configure email transporter using Nodemailer
+
+  // Send email using MailerService
   private async sendEmail(email: string, subject: string, text: string): Promise<void> {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'immanueliniobong@gmail.com',  
-        pass: 'jicvrgsgyoyutrna',            
+        user: process.env.EMAIL_USER,  // Make sure this is correctly set in your .env
+        pass: process.env.EMAIL_PASS,  // Make sure this is correctly set in your .env
       },
-      secure: true,                   
-            host: 'smtp.gmail.com',         
-      port: 465,                      
-    }); 
-      
-    // try {
-    //   await transporter.sendMail({
-    //     from: 'immanueliniobong@gmail.com',  // Sender's email
-    //     to: email,                           // Recipient's email
-    //     subject: subject,
-    //     text: text,
-    //   });
-    //   console.log('Email sent successfully');
-    // } catch (error) {
-    //   console.error(`Failed to send email: ${error.message}`);
-    //   throw new Error('Failed to send email. Please try again later.');
-    // }
+      secure: true,                   // Use TLS
+      host: 'smtp.gmail.com',
+      port: 465,                      // Port for secure SMTP
+    });
+  
+    if (!email || !subject || !text) {
+      throw new Error('Email, subject, or text is missing');
+    }
+  
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,  // Sender's email from .env
+        to: email,                     // Recipient's email
+        subject: subject,
+        text: text,
+      });
+      console.log('Email sent successfully');
+    } catch (error) {
+      console.error(`Failed to send email: ${error.message}`);
+      throw new Error('Failed to send email. Please try again later.');
+    }
   }
+  
 
   // Signup method
   async signup(createUserDto: CreateUserDto): Promise<any> {
@@ -84,9 +95,9 @@ export class UserService {
       await this.sendEmail(
         email,
         'Your OTP Code',
-        `Your OTP code is: ${otpCode}. It is valid for 10 minutes.`,
+        `Your OTP code is: ${otpCode}. Hello : ${firstname},please note your OTP is valid for only10 minutes.`,
       );
-      return { message: 'OTP sent to your email. Please verify your account.' };
+      return { message: 'OTP sent to your email. Please verify your account within 10 minutes.' };
     } catch (error) {
       console.error(`Error saving user: ${error.message}`);
       throw new InternalServerErrorException('Error creating account. Please try again later.');
@@ -103,6 +114,12 @@ export class UserService {
       throw new BadRequestException('Invalid email');
     } 
 
+    // Check if OTP is valid and not expired
+    if (user.otpCode !== otpCode || new Date(user.otpexpires).getTime() < Date.now()) {
+      throw new BadRequestException('Invalid or expired OTP');
+    }
+    
+
     // Clear OTP fields after successful verification
     user.otpCode = undefined;
     user.otpexpires = undefined;
@@ -114,14 +131,13 @@ export class UserService {
       console.error(`Error verifying user: ${error.message}`);
       throw new InternalServerErrorException('Error verifying account. Please try again later.');
     }
-
-    
   }
-  //User login Method
-  async login(loginDto: LoginDto): Promise<any> { //the toke here allows JWT to be returned 
+
+  // User login method
+  async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
 
-    // Find user by  their email
+    // Find user by email
     const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -133,7 +149,8 @@ export class UserService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-   
+    // Generate and return JWT token
+    const token = this.jwtService.sign({ userId: user._id });
+    return { accessToken: token };
   }
-
 }

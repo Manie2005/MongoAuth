@@ -12,7 +12,10 @@ async signUp (@Body()createUserDto:CreateUserDto){
    return this.userService.signup(createUserDto);
 
 }
-// @Post ('login'){
-//    async login(@Body()loginDto:LoginDto)
-// }
+@Post ('login')
+   async login(@Body()loginDto:LoginDto){
+   const {email,password} = loginDto;
+      return this.userService.login(loginDto);
+   }
+
 }
