@@ -184,7 +184,7 @@ async forgotPassword(email: string): Promise<void> {
   try {
     await this.sendEmail(
       user.email,
-      'Password Reset Request',
+      'Reset Password Request',
       `You requested a password reset. Click the link to reset your password: ${resetLink}`
     );
     console.log('Reset password email sent successfully');
