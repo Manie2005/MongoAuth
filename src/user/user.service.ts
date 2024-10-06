@@ -161,11 +161,11 @@ export class UserService {
   // Forgot password functionality (send password reset email)
  
   async forgotPassword(email: string): Promise<void> {
-    const user = await this.userService.findOneByEmail(email);
+    const user = await this.userModel.findOne({ email });
     if (!user) {
-      throw new UnauthorizedException('No user found with this email.');
+        throw new BadRequestException('User email is not found');
     }
-
-    const token = this.jwtService.sign({ email }, { expiresIn: '1h' }); // Generate token valid for 1 hour
-  }
+    // Additional forgot password logic
+ }
+ 
 }
