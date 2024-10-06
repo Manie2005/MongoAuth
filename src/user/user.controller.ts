@@ -1,4 +1,4 @@
-import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, BadRequestException, Req, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login-user.dto';
@@ -47,5 +47,9 @@ async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     resetPasswordDto.newPassword
   );
 }
-
+@Post('logout')
+async logout(@Req() req: Request, @Res() res: Response) {
+  // The client will simply delete the token from localStorage or cookies
+  console.log({ message: 'Logged out successfully' });
+}
 }
