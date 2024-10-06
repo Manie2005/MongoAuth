@@ -12,6 +12,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 require ('dotenv').config();
 @Injectable()
 export class UserService {
+  userService: any;
   validateUser(email: string, password: string) {
      throw new Error('Method not implemented.');
   }
@@ -95,7 +96,7 @@ export class UserService {
       await this.sendEmail(
         email,
         'Your OTP Code',
-        `Your OTP code is: ${otpCode}. Hello : ${firstname},please note your OTP is valid for only10 minutes.`,
+        `Your OTP code is: ${otpCode}. Hello : ${firstname} ,please note your OTP is valid for only 10 minutes.`,
       );
       return { message: 'OTP sent to your email. Please verify your account within 10 minutes.' };
     } catch (error) {
@@ -118,6 +119,9 @@ export class UserService {
     if (user.otpCode !== otpCode || new Date(user.otpexpires).getTime() < Date.now()) {
       throw new BadRequestException('Invalid or expired OTP');
     }
+    return{
+      message:'OTP verified succesfully',
+    }
     
 
     // Clear OTP fields after successful verification
@@ -139,6 +143,7 @@ export class UserService {
 
     // Find user by email
     const user = await this.userModel.findOne({ email });
+    console.log('Logged In Successfully');
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -152,5 +157,15 @@ export class UserService {
     // Generate and return JWT token
     const token = this.jwtService.sign({ userId: user._id });
     return { accessToken: token };
+  }
+  // Forgot password functionality (send password reset email)
+ 
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('No user found with this email.');
+    }
+
+    const token = this.jwtService.sign({ email }, { expiresIn: '1h' }); // Generate token valid for 1 hour
   }
 }
