@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login-user.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -39,4 +40,12 @@ export class UserController {
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<void> {
     await this.userService.forgotPassword(forgotPasswordDto.email); // `email` will now work correctly
   }
+  @Post('reset-password')
+async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+  return this.userService.resetPassword(
+    resetPasswordDto.Token, 
+    resetPasswordDto.newPassword
+  );
+}
+
 }

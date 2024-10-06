@@ -160,12 +160,66 @@ export class UserService {
   }
   // Forgot password functionality (send password reset email)
  
-  async forgotPassword(email: string): Promise<void> {
-    const user = await this.userModel.findOne({ email });
+  // Forgot password functionality (send password reset email)
+async forgotPassword(email: string): Promise<void> {
+  const user = await this.userModel.findOne({ email });
+  if (!user) {
+      throw new BadRequestException('User with this email is not found');
+  }
+
+  // Generate a reset token using JWT
+  const resetToken = this.jwtService.sign(
+    { userId: user._id },
+    { expiresIn: '1h' } // Token expires in 1 hour
+  );
+
+  // Save the reset token and its expiration to the user's record
+  user.resetPasswordToken = resetToken;
+  user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1-hour expiration
+  await user.save();
+
+  // Send reset token to the user's email
+  const resetLink = `http://Immanuel.com/reset-password?token=${resetToken}`;
+
+  try {
+    await this.sendEmail(
+      user.email,
+      'Password Reset Request',
+      `You requested a password reset. Click the link to reset your password: ${resetLink}`
+    );
+    console.log('Reset password email sent successfully');
+  } catch (error) {
+    console.error(`Failed to send password reset email: ${error.message}`);
+    throw new InternalServerErrorException('Failed to send password reset email');
+  }
+}
+// Reset password functionality (update the user's password)
+async resetPassword(token: string, newPassword: string): Promise<void> {
+  try {
+    // Verify the reset token using JWT
+    const decoded = this.jwtService.verify(token);
+    const user = await this.userModel.findOne({
+      _id: decoded.userId,
+      resetPasswordToken: token,         // Ensure token matches
+      resetPasswordExpires: { $gt: new Date() } // Ensure token is not expired
+    });
+
     if (!user) {
-        throw new BadRequestException('User email is not found');
+      throw new BadRequestException('Invalid or expired password reset token');
     }
-    // Additional forgot password logic
- }
+
+    // Hash the new password and update the user's record
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;  // Clear the reset token
+    user.resetPasswordExpires = undefined; // Clear the expiration
+    await user.save();
+
+  console.log ( 'Password successfully reset' );
+  } catch (error) {
+    throw new UnauthorizedException('Invalid or expired reset token');
+  }
+}
+
  
 }
