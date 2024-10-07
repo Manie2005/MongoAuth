@@ -33,6 +33,7 @@ import { join } from 'path';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from './user/user.service';
+import { PaymentService } from './payment/payment.service';
 @Module({
     imports: [
       ConfigModule.forRoot({ isGlobal: true }),  
@@ -62,7 +63,7 @@ import { UserService } from './user/user.service';
       UserModule
     ],
     controllers:[AppController],
-    providers: [AppService],
+    providers: [AppService, PaymentService],
   })
   export class AppModule {}
 
