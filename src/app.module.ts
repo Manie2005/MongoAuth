@@ -64,7 +64,7 @@ import { AdminModule } from './admin/admin.module';
         },
       }),
       UserModule,
-      AdminModule
+      AdminModule,
     ],
     controllers:[AppController, AdminController],
     providers: [AppService, PaymentService, AdminService],
