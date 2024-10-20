@@ -34,6 +34,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from './user/user.service';
 import { PaymentService } from './payment/payment.service';
+import { AdminService } from './admin/admin.service';
+import { AdminController } from './admin/admin.controller';
+import { AdminModule } from './admin/admin.module';
 @Module({
     imports: [
       ConfigModule.forRoot({ isGlobal: true }),  
@@ -60,10 +63,11 @@ import { PaymentService } from './payment/payment.service';
           },
         },
       }),
-      UserModule
+      UserModule,
+      AdminModule
     ],
-    controllers:[AppController],
-    providers: [AppService, PaymentService],
+    controllers:[AppController, AdminController],
+    providers: [AppService, PaymentService, AdminService],
   })
   export class AppModule {}
 
