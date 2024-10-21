@@ -1,28 +1,3 @@
-// import { Module } from '@nestjs/common';
-// import { AppController } from './app.controller';
-// import { AppService } from './app.service';
-// import { UserModule } from './user/user.module';
-// import { MailerModule } from '@nestjs-modules/mailer';
-// import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-// import { join } from 'path';
-// import { MongooseModule } from '@nestjs/mongoose';
-// import { ConfigModule } from '@nestjs/config';
-// @Module({
-//   imports: [
-//    ConfigModule.forRoot({
-//     isGlobal:true,
-//    }),     
-// MongooseModule.forRoot(process.env.MONGO_URI)
-//     ,UserModule],
-//   controllers: [AppController],
-//   providers: [AppService],
-// })
-// export class AppModule {
-//   constructor() {
-//     console.log('MongoDb Connected Successfully');
-//   }
-// }
-
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -66,9 +41,7 @@ import { AdminModule } from './admin/admin.module';
       UserModule,
       AdminModule,
     ],
-    controllers:[AppController, AdminController],
-    providers: [AppService, PaymentService, AdminService],
-  })
+     })
   export class AppModule {}
 
 
