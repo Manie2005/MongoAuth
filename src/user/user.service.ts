@@ -106,43 +106,50 @@ export class UserService {
       await this.sendEmail(
         email,
         'Your OTP Code',
-        `Your OTP code is: ${otpCode}. Hello : ${firstname}, please note your OTP is valid for only 10 minutes.`,
+        `Your OTP code is: ${otpCode}. Hello : ${firstname}, please note your OTP is valid for only 15 minutes.`,
       );
-      return { message: 'OTP sent to your email. Please verify your account within 10 minutes.' };
+      return { message: 'OTP sent to your email. Please verify your account within 15 minutes.' };
     } catch (error) {
       console.error(`Error saving user: ${error.message}`);
       throw new InternalServerErrorException('Error creating account. Please try again later.');
     }
   }
-
-  // Verify OTP method
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<any> {
     const { email, otpCode } = verifyOtpDto;
-
+  
     // Find user by email
     const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new BadRequestException('Invalid email');
     }
-
+  
+    // Debugging Logs (Remove in Production)
+    console.log('Received OTP:', otpCode);
+    console.log('Stored OTP:', user.otpCode);
+    console.log('OTP Expiration:', user.otpexpires);
+  
     // Check if OTP is valid and not expired
-    if (user.otpCode !== otpCode || new Date(user.otpexpires).getTime() < Date.now()) {
-      throw new BadRequestException('Invalid or expired OTP');
+    if (user.otpCode !== otpCode.toString()) {
+      throw new BadRequestException('Invalid OTP');
     }
-
-    // Clear OTP fields after successful verification
+    if (new Date(user.otpexpires).getTime() < Date.now()) {
+      throw new BadRequestException('OTP has expired');
+    }
+  
+    // Clear OTP fields and mark user as verified (if applicable)
     user.otpCode = undefined;
     user.otpexpires = undefined;
-
+    user.isVerified = true; // Add this field in the schema if user verification status is needed
+  
     try {
-      await user.save();
+      await user.save(); // Save changes to the database
       return { message: 'Account successfully verified' };
     } catch (error) {
-      console.error(`Error verifying user: ${error.message}`);
+      console.error(`Error saving user: ${error.message}`);
       throw new InternalServerErrorException('Error verifying account. Please try again later.');
     }
   }
-
+  
   // User login method
   async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;

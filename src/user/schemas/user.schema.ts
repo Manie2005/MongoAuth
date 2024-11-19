@@ -29,6 +29,9 @@ export class User extends Document{
     @Prop()
     resetPasswordExpires?: Date;
 
+    @Prop({ default: false }) // Default value is false
+isVerified: boolean;
+
     @Prop()
     otpCode?:string;
 
