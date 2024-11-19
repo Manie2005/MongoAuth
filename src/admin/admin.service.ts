@@ -26,14 +26,14 @@ export class AdminService {
       }
 
       // Hash admin password
-      const hashedPassword = await bcrypt.hash('adminpassword', 12);
+      const hashedPassword = await bcrypt.hash('C@keMania2024', 12);
 
       // Create the admin
       const adminData: Partial<Admin> = {
         firstname: 'Manie',
         lastname: 'Samuel',
         email: 'maniesamuel24@gmail.com',
-        password: `C@keMania2024`,
+        password:hashedPassword, // Use the hashed password here
         role: 'admin',
       };
 
@@ -47,21 +47,26 @@ export class AdminService {
     }
   }
 
-  // Admin Login
   async adminLogin(adminLoginDto: AdminLoginDto): Promise<any> {
     const { email, password } = adminLoginDto;
+
+    console.log('Admin login data:', { email, password });
+
     const admin = await this.adminModel.findOne({ email, role: 'admin' }); // Ensure role is admin
     if (!admin) {
+      console.log('Admin not found or role mismatch');
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
+      console.log('Password mismatch');
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Generate JWT token
     const token = this.jwtService.sign({ userId: admin._id, role: admin.role });
+    console.log('Admin login successful');
     return { accessToken: token };
   }
 

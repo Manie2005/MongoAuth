@@ -11,8 +11,8 @@ export class Admin extends Document {
   @Prop({ required: true })
   lastname: string;
 
-  @Prop({ required: true })
-  phonenumber: string;
+  // @Prop({ required: true })
+  // phonenumber: string;
 
   @Prop({ required: true, unique: true })
   email: string;
