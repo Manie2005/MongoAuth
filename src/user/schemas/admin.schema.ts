@@ -19,7 +19,7 @@ export class Admin extends Document {
 
   @Prop({ required: true })
   password: string;
-  @Prop({ required: true })
+  @Prop({default:`admin`, required: true })
   role: string;
 }
 
