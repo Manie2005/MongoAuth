@@ -17,7 +17,7 @@ export class User extends Document{
     @Prop({required:true})
     address:string;
 
-    @Prop({required:true})
+    @Prop({default:`user`,required:true})
     role:string;
     
         @Prop({required:true})
